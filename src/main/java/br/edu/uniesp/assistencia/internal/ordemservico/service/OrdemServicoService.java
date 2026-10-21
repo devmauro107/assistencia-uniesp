@@ -26,25 +26,28 @@ public class OrdemServicoService {
     private final ClienteRepository clienteRepository;
     private final EquipamentoRepository equipamentoRepository;
 
-    public CriarOrdemServicoResponse abrirOrdemServico(
-            CriarOrdemServicoRequest request){
+
+
+    public CriarOrdemServicoResponse abrirOrdemServico(CriarOrdemServicoRequest request) {
 
         ClienteEntity cliente = clienteRepository
                 .findById(request.clienteId()).orElseThrow(()
                         -> new RecursoNaoEncontradoException
                         ("Cliente", request.clienteId()));
 
-        if(!cliente.isAtivo()){
+        if(!cliente.isAtivo()) {
             throw new RegraNegocioException("Não é permitido abrir Ordem de Serviço para um cliente inativo.");
         }
+
         EquipamentoEntity equipamento = equipamentoRepository
                 .findById(request.equipamentoId()).orElseThrow(()
                         -> new RecursoNaoEncontradoException
                         ("Equipamento", request.equipamentoId()));
 
-        if (equipamento.getCliente().getId().equals(cliente.getId())){
-            throw new RegraNegocioException("O equipamento informado não pertence ao cliente informado. ");
+        if (!equipamento.getCliente().getId().equals(cliente.getId())) {
+            throw new RegraNegocioException("O equipamento informado não pertence ao cliente indicado.");
         }
+
         String numeroProtocolo =gerarNumeroProtocolo();
 
         OrdemServicoEntity ordemServicoEntity =
@@ -55,6 +58,8 @@ public class OrdemServicoService {
         ordemServicoRepository.save(ordemServicoEntity);
         return OrdemServicoMapper.paraResposta(ordemServicoEntity);
     }
+
+
 
     private String gerarNumeroProtocolo() {
         String data = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
